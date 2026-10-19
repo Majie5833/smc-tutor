@@ -1,0 +1,142 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SMC 学堂 · 聪明钱概念</title>
+<style>
+:root{--bg:#0d1424;--card:#151d33;--line:#26324e;--ink:#e8eefb;--mut:#8b9cc0;--gold:#f0b429;--blue:#4a90d9;--red:#e05252;--green:#3cb371}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--ink);font:15px/1.7 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif;padding-bottom:70px}
+.hd{padding:20px 16px 12px;text-align:center}
+.hd h1{font-size:22px;letter-spacing:2px}
+.hd h1 span{color:var(--gold)}
+.hd p{color:var(--mut);font-size:12px;margin-top:2px}
+.tabs{position:fixed;bottom:0;left:0;right:0;display:flex;background:#101828;border-top:1px solid var(--line);z-index:50}
+.tabs button{flex:1;background:none;border:0;color:var(--mut);font-size:12px;padding:9px 0 11px;cursor:pointer}
+.tabs button.on{color:var(--gold)}
+.page{display:none;padding:8px 12px;max-width:680px;margin:0 auto}
+.page.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:10px}
+.lesson{display:flex;align-items:center;gap:12px;cursor:pointer}
+.done-dot{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);flex:none;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--mut)}
+.lesson.done .done-dot{background:var(--green);border-color:var(--green);color:#fff}
+.lesson h3{font-size:15px}
+.lesson small{color:var(--mut);display:block;font-size:12px}
+.prog{height:5px;background:var(--line);border-radius:3px;margin:12px 2px}
+.prog i{display:block;height:100%;background:var(--gold);border-radius:3px;transition:width .3s}
+img.dg{width:100%;border-radius:8px;border:1px solid var(--line);margin:8px 0}
+.tag{display:inline-block;background:#1d2a45;color:var(--gold);font-size:11px;padding:2px 8px;border-radius:4px;margin:2px 4px 2px 0}
+.sec{color:var(--gold);font-size:13px;font-weight:700;margin:10px 0 4px}
+.point{color:var(--mut);font-size:13px;white-space:pre-wrap}
+.mist{color:#e8a0a0;font-size:13px;white-space:pre-wrap}
+.card-btn{background:#1d2a45;border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:10px 12px;font-size:14px;width:100%;text-align:left;margin:4px 0;cursor:pointer}
+.flip{background:#22325a;border-color:var(--blue)}
+.q-opt{display:block;width:100%;background:#1d2a45;border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:10px;margin:5px 0;font-size:14px;text-align:left;cursor:pointer}
+.q-opt.right{border-color:var(--green);color:var(--green)}
+.q-opt.wrong{border-color:var(--red);color:var(--red)}
+.gal{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.gal div{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px;text-align:center;font-size:11px;color:var(--mut)}
+.gal img{width:100%;border-radius:5px}
+#viewer{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;z-index:99;padding:16px;overflow:auto}
+#viewer img{max-width:100%;margin-top:30px}
+#viewer .x{position:fixed;top:12px;right:16px;color:#fff;font-size:26px;cursor:pointer}
+</style></head><body>
+<div class="hd"><h1>SMC <span>学堂</span></h1><p>聪明钱概念 · Smart Money Concepts · 纸上学习不构成投资建议</p></div>
+<div class="tabs">
+<button class="on" data-p="p1">📚 课程</button>
+<button data-p="p2">🖼 图鉴</button>
+<button data-p="p3">⚠️ 误区</button>
+<button data-p="p4">✏️ 测验</button>
+</div>
+<div class="page on" id="p1">
+<div class="card"><div class="prog"><i id="pbar"></i></div><div style="color:var(--mut);font-size:12px" id="ptxt"></div></div>
+<div id="lessonList"></div>
+</div>
+<div class="page" id="p2">
+<div class="card"><div class="sec">核心图解</div><div class="gal" id="gal1"></div>
+<div class="sec">QM / 供需 入场模型 24 式</div><div class="gal" id="gal2"></div></div>
+</div>
+<div class="page" id="p3">
+<div id="mistList"></div>
+<div class="card" style="margin-top:10px"><div class="sec">进阶概念（ICT）</div><div id="advList"></div></div>
+</div>
+<div class="page" id="p4">
+<div class="card"><div id="quizBox"><button class="card-btn" style="text-align:center" onclick="startQuiz()">开始测验 · 随机 5 题</button>
+<div style="color:var(--mut);font-size:12px;margin-top:6px" id="qhint"></div></div></div>
+</div>
+<div id="viewer" onclick="this.style.display='none'"><span class="x">✕</span><img id="vimg"></div>
+<script>const DATA={"lessons": [{"name": "L0 · SMC 是什么", "goal": "理解\"大资金需要对手盘\"这个底层逻辑。", "points": "市场反复做三件事：制造流动性 → 吸收流动性 → 利用流动性推动。用\"批发苹果的采购商\"比喻。七步阅读顺序：结构 → 位置 → 流动性 → 位移 → 订单区 → 触发 → 执行。", "mistake": "", "practice": "打开任意一张日线图，找出一个\"先跌破前低、再快速拉回\"的位置，描述你看到了什么。", "cards": [{"q": "1. SMC 的三层判断分别给出什么？", "a": "结构给方向，位置给立场，触发给时机"}, {"q": "2. 为什么很多底部长成\"先破前低再拉回\"？", "a": "大资金需要扫掉前低下方的止损作为对手盘来建仓"}, {"q": "3. 判断题：学会 SMC 就能保证盈利。", "a": "错，SMC 是框架，不保证收益"}], "img": "diagrams/png/00-七步阅读顺序.png"}, {"name": "L1 · 市场结构", "goal": "能在一张图上稳定地标出 HH/HL/LH/LL。", "points": "有效回撤的严格规则（第 2 或第 3 根破第 1 根的低 / 高点）；内包线不算回撤；上涨靠 HH+HL，下跌靠 LH+LL；结构有级别，只标关键点。", "mistake": "每个小波动都标；把内包线当回撤。", "practice": "选一段 4 小时图，标出最近 6 个摆动点，并判断当前趋势。", "cards": [{"q": "1. 上涨趋势由哪两种摆动点维持？", "a": "HH 和 HL"}, {"q": "2. 一根 K 线完全在前一根的高低点内，算回撤吗？", "a": "不算，是内包线"}, {"q": "3. 出现 LH 说明什么？", "a": "多头开始无力，高点没能创新高"}], "img": "diagrams/png/01-市场结构.png"}, {"name": "L2 · BOS / CHoCH / MSS", "goal": "能区分延续信号和转向信号。", "points": "BOS = 顺方向突破；CHoCH = 打破守门点（上涨里最后一个 HL，下跌里最后一个 LH）；MSS = CHoCH 后新方向再出 BOS（本教程口径，ICT 原意更接近\"带位移的 CHoCH\"）。BOS 必须实体收盘突破，且突破前要先有诱导。", "mistake": "看到 CHoCH 就认定反转；用影线刺穿判断 BOS。", "practice": "在一段下跌转上涨的走势里，标出最后一个 LH、CHoCH 发生的 K 线、以及确认 MSS 的那次 BOS。", "cards": [{"q": "1. 下跌趋势中，价格收盘突破最后一个 LH，叫什么？", "a": "CHoCH"}, {"q": "2. 影线刺穿前高但收盘在下方，算 BOS 吗？", "a": "不算，更像清扫"}, {"q": "3. CHoCH 和 MSS 哪个确认度更高？", "a": "MSS"}], "img": "diagrams/png/02-BOS-CHoCH-MSS.png"}, {"name": "L3 · 流动性与清扫", "goal": "能找出图上的 BSL / SSL，并区分清扫和真突破。", "points": "前高 / 等高上方 = BSL，前低 / 等低下方 = SSL；越明显越容易被扫；清扫会收回，突破会延续；只扫不走，不做。", "mistake": "看到突破就追；一扫流动性就立刻反手。", "practice": "在一张图上找出 2 处等高或等低，观察后来是否被扫，被扫后有没有位移。", "cards": [{"q": "1. 前低下方聚集的主要是什么订单？", "a": "多头止损和空头突破单，即 SSL"}, {"q": "2. 刺穿前高后迅速收回、留下长上影，更像清扫还是突破？", "a": "清扫"}, {"q": "3. 扫完流动性之后，入场前还要看到什么？", "a": "位移，即快速有力的反向推动"}], "img": "diagrams/png/03-流动性清扫.png"}, {"name": "L4 · 诱导 Inducement", "goal": "能识别诱导点，并分辨诱导区和有效 OB。", "points": "BOS 前先扫最近一次内部回撤的流动性 = 诱导；按 Miller 的严格口径，没有诱导的 BOS 不算有效（讲解时说明这是严格口径，不是所有教材都要求）；靠近回撤起点的区域往往是诱导区；有效 OB 在诱导被扫之后形成。", "mistake": "把诱导区当入场区，频繁被扫损。", "practice": "在一段上涨推动里，找出最近一次内部回撤的低点，判断它后来是否被扫，再找出扫完之后形成的 OB。", "cards": [{"q": "1. 上涨中，有效 BOS 之前价格要先做什么？", "a": "扫掉最近一次内部回撤的低点"}, {"q": "2. 上涨趋势中两个 OB，诱导完成前形成的那个通常是什么？", "a": "诱导区，容易被吃掉"}, {"q": "3. 为什么挂在诱导区的单容易被扫？", "a": "那里本身就是要被清掉的流动性"}], "img": "diagrams/png/04-诱导Inducement.png"}, {"name": "L5 · 位移与 FVG", "goal": "能按三根 K 线规则画出 FVG，并判断质量。", "points": "位移三要素（速度、破结构、留痕迹）；多头 FVG = A 高点到 C 低点；高质量 FVG 的四个加分项；FVG 是候选位不是按钮。", "mistake": "见缺口就进；把普通大 K 线当位移。", "practice": "找 3 个 FVG，分别判断它是否伴随结构突破、是否先扫了流动性、处于贵区还是便宜区。", "cards": [{"q": "1. 多头 FVG 的上下边界分别是什么？", "a": "下边界是 A 的最高点，上边界是 C 的最低点"}, {"q": "2. 一根大阳线没破任何结构，算位移吗？", "a": "不算"}, {"q": "3. 先扫流动性再位移留下的 FVG，质量高还是低？", "a": "高"}], "img": "diagrams/png/05-FVG三根K线.png"}, {"name": "L6 · 订单区 OB 与 POI", "goal": "能识别 OB、评估质量，并知道到区后要等确认。", "points": "OB 三个硬条件（扫流动性 + 失衡 + 结构）；区域只取最后一根反向 K 线的实体，影线作缓冲；四维质量（新鲜度、扫没扫、位移、结构）；多 OB 选择规则；先大周期 POI，再小周期 OB；到区先看反应。", "mistake": "最后一根反向 K 线就叫 OB；见区就做。", "practice": "找 2 个 OB，用四个维度给它们打分，预测哪个反应更强，再看后续走势验证。", "cards": [{"q": "1. OB 和 POI 哪个条件更严格？", "a": "OB，需要失衡 + 结构"}, {"q": "2. 被测试过三次的 OB，反应会更强还是更弱？", "a": "更弱"}, {"q": "3. 价格进入 OB 后，进场前至少要看到什么？", "a": "拒绝反应或小级别结构转变"}, {"q": "4. 本教程里 OB 的区域取 K 线的哪一段？", "a": "实体，即开盘到收盘；影线只作缓冲"}], "img": "diagrams/png/06-订单区OB.png"}, {"name": "L7 · Premium / Discount", "goal": "能画出区间并用位置过滤信号。", "points": "选决定结构的波段画 50%；上半贵区偏找空，下半便宜区偏找多；中位上下都不明确；位置错了信号打折。", "mistake": "随便选一段波段画；在贵区找多、便宜区找空。", "practice": "在当前上涨波段画 50% 线，标出现在价格在哪一侧，并说出此刻应该找多还是找空。", "cards": [{"q": "1. 50% 线叫什么？", "a": "Equilibrium 均衡点"}, {"q": "2. 上涨大方向中，最理想的做多区域在哪一侧？", "a": "Discount 便宜区"}, {"q": "3. 价格在中线附近，初学者该怎么做？", "a": "等价格走到某一侧再说"}], "img": "diagrams/png/07-Premium-Discount.png"}, {"name": "L8 · 触发与入场", "goal": "掌握完整节奏和几种触发方式。", "points": "扫 → 位移 → CHoCH → 回踩 → 确认；入门首选小级别 CHoCH；拒绝针看第 2 根；不给深回踩时用反应 K 线 + 确认 K 线；激进 vs 保守入场。", "mistake": "少一步就进场；拒绝针一出现就进。", "practice": "在图上完整标出一次\"扫 → 位移 → CHoCH → 回踩 → 确认\"，写出入场、止损、目标，算出盈亏比。", "cards": [{"q": "1. 完整节奏的五步是什么？", "a": "扫流动性、位移、CHoCH、回踩、确认"}, {"q": "2. 拒绝针后第 2 根 K 线小实体犹豫，怎么办？", "a": "放弃"}, {"q": "3. 新手更适合激进入场还是保守入场？", "a": "保守入场"}], "img": "diagrams/png/08-完整入场节奏.png"}, {"name": "L9 · 多周期与完整流程", "goal": "能用三个周期完成一次完整分析。", "points": "大周期定方向和区间，中周期找结构和 OB，小周期找触发；冲突听大周期；十一步清单。", "mistake": "", "practice": "用日线 → 1 小时 → 5 分钟，按十一步清单走一遍，写出完整的八要素计划。", "cards": [{"q": "1. 找具体入场扳机用哪个周期？", "a": "小周期"}, {"q": "2. 大周期上涨、小周期出现向下 CHoCH，通常意味着什么？", "a": "正常回调，不是反手信号"}, {"q": "3. 十一步清单的第一步是什么？", "a": "判断大周期方向"}], "img": "diagrams/png/01-市场结构.png"}, {"name": "L10 · 风控、执行与复盘", "goal": "建立能长期执行的纪律。", "points": "止损按结构设；盈亏比至少 1:2；单笔风险控制在小比例；八要素写全才执行；三种 FOMO 及对策；写下偏见和失效条件；复盘模板。", "mistake": "", "practice": "把最近 5 次分析（或模拟交易）用复盘模板记录，找出自己最常犯的一个错误。", "cards": [{"q": "1. 止损应该放在哪里？", "a": "分析被证伪的结构位置之外"}, {"q": "2. 被止损后立刻想再开一笔扳回来，属于哪种 FOMO？", "a": "报复型"}, {"q": "3. 写偏见时必须同时写什么？", "a": "失效条件"}], "img": "diagrams/png/08-完整入场节奏.png"}, {"name": "L11（进阶）· ICT 补充概念与入场模型", "goal": "认识 ICT 体系里常见的补充概念，以及 QM / 供需区一派的入场模型，并能**用 SMC 的语言**拆解它们。", "points": "Breaker = 扫流动性后失效的 OB；Mitigation = 没扫流动性的失效 OB；OTE = 0.62–0.79 回撤，只是位置过滤；PO3 = 横盘 → 扫 → 位移；QM = 扫高 + CHoCH + 回测左肩；假突破 = 流动性清扫；压缩 = 人为制造的流动性。", "mistake": "把模型名字当成新体系去背；看到形态就进场，不等节奏；一次学太多模型。", "practice": "在自己的图上找 3 个 QM，每个都写出\"扫了哪里、哪里结构转向、QML 在哪\"。", "cards": [{"q": "1. Breaker 和 Mitigation 的区别是什么？", "a": "Breaker 先扫了流动性再反转，Mitigation 没有扫流动性"}, {"q": "2. QM 用 SMC 的语言怎么描述？", "a": "扫高 + 跌破前低的 CHoCH + 回测左肩所在水平"}, {"q": "3. 价格到了 OTE 区，可以直接进场吗？", "a": "不可以，OTE 只是位置过滤，仍要等反应 K 线或小级别 CHoCH"}, {"q": "1. 下列哪一项最能说明一次 BOS 有效？ A. 影线刺穿前高 B. 实体收盘突破前高，且之前扫过内部回撤 C. 成交量放大 D. 突破整数关口", "a": "B"}, {"q": "2. 多头 FVG 由哪两个价格定义？ A. B 的开盘和收盘 B. A 的最高点和 C 的最低点 C. A 的最低点和 C 的最高点 D. B 的最高点和最低点", "a": "B"}, {"q": "3. 在上涨大方向中，价格处于 Premium 区，出现多头信号，应该？ A. 立刻重仓 B. 降低预期，优先等回到 Discount C. 反手做空 D. 加倍仓位", "a": "B"}, {"q": "4. 哪种情况属于流动性清扫？ A. 收盘站上前高后回踩不破 B. 刺穿前低后迅速收回并留下长下影 C. 横盘不动 D. 连续阳线", "a": "B"}, {"q": "5. OB 的三个硬条件不包括？ A. 扫过流动性 B. 失衡（FVG） C. 结构转变 D. 出现在整数价位", "a": "D"}, {"q": "6. 大周期和小周期方向冲突时？ A. 听小周期 B. 听大周期 C. 两边各开一单 D. 随机选", "a": "B"}, {"q": "7. 拒绝针后第 2 根 K 线犹豫不前，正确做法？ A. 加仓 B. 放弃 C. 反向开仓 D. 移动止损", "a": "B"}, {"q": "8. 止损的正确逻辑是？ A. 按能接受亏多少钱倒推 B. 放在分析被证伪的结构位置之外 C. 越近越好 D. 不设止损", "a": "B"}, {"q": "9. 下跌趋势中，CHoCH 指的是？ A. 跌破前低 B. 收盘突破最后一个 LH C. 出现长下影 D. 价格回到 50%", "a": "B"}, {"q": "10. 上涨中两个 OB，哪个更可能是诱导区？ A. 诱导被扫之后形成的较低 OB B. 靠近回撤起点、诱导被扫之前形成的较高 OB C. 两个都是 D. 两个都不是", "a": "B"}, {"q": "11. 扫完流动性后最先要确认什么？ A. 新闻 B. 位移 C. 成交量创新高 D. 均线金叉", "a": "B"}, {"q": "12. 新手建议的最低盈亏比是？ A. 1:0.5 B. 1:1 C. 1:2 D. 无所谓", "a": "C"}, {"q": "13. 连续多日窄幅横盘、无新消息，最好的策略往往是？ A. 高频交易 B. 不做或观望 C. 满仓突破 D. 逆势加仓", "a": "B"}, {"q": "14. \"八要素\"不包括？ A. 方向 B. 止损价 C. 别人的观点 D. 风险比例", "a": "C"}, {"q": "15. 位移的三要素是？ A. 速度、破结构、留痕迹 B. 成交量、均线、MACD C. 开盘、收盘、影线 D. 新闻、情绪、价格", "a": "A"}], "img": "diagrams/png/11-OB一图看懂.png"}], "quiz": [{"stem": "下列哪一项最能说明一次 BOS 有效？", "opts": ["A. 影线刺穿前高", "B. 实体收盘突破前高，且之前扫过内部回撤", "C. 成交量放大", "D. 突破整数关口"], "ans": "B"}, {"stem": "多头 FVG 由哪两个价格定义？", "opts": ["A. B 的开盘和收盘", "B. A 的最高点和 C 的最低点", "C. A 的最低点和 C 的最高点", "D. B 的最高点和最低点"], "ans": "B"}, {"stem": "在上涨大方向中，价格处于 Premium 区，出现多头信号，应该？", "opts": ["A. 立刻重仓", "B. 降低预期，优先等回到 Discount", "C. 反手做空", "D. 加倍仓位"], "ans": "B"}, {"stem": "哪种情况属于流动性清扫？", "opts": ["A. 收盘站上前高后回踩不破", "B. 刺穿前低后迅速收回并留下长下影", "C. 横盘不动", "D. 连续阳线"], "ans": "B"}, {"stem": "OB 的三个硬条件不包括？", "opts": ["A. 扫过流动性", "B. 失衡（FVG）", "C. 结构转变", "D. 出现在整数价位"], "ans": "D"}, {"stem": "大周期和小周期方向冲突时？", "opts": ["A. 听小周期", "B. 听大周期", "C. 两边各开一单", "D. 随机选"], "ans": "B"}, {"stem": "拒绝针后第 2 根 K 线犹豫不前，正确做法？", "opts": ["A. 加仓", "B. 放弃", "C. 反向开仓", "D. 移动止损"], "ans": "B"}, {"stem": "止损的正确逻辑是？", "opts": ["A. 按能接受亏多少钱倒推", "B. 放在分析被证伪的结构位置之外", "C. 越近越好", "D. 不设止损"], "ans": "B"}, {"stem": "下跌趋势中，CHoCH 指的是？", "opts": ["A. 跌破前低", "B. 收盘突破最后一个 LH", "C. 出现长下影", "D. 价格回到 50%"], "ans": "B"}, {"stem": "上涨中两个 OB，哪个更可能是诱导区？", "opts": ["A. 诱导被扫之后形成的较低 OB", "B. 靠近回撤起点、诱导被扫之前形成的较高 OB", "C. 两个都是", "D. 两个都不是"], "ans": "B"}, {"stem": "扫完流动性后最先要确认什么？", "opts": ["A. 新闻", "B. 位移", "C. 成交量创新高", "D. 均线金叉"], "ans": "B"}, {"stem": "新手建议的最低盈亏比是？", "opts": ["A. 1:0.5", "B. 1:1", "C. 1:2", "D. 无所谓"], "ans": "C"}, {"stem": "连续多日窄幅横盘、无新消息，最好的策略往往是？", "opts": ["A. 高频交易", "B. 不做或观望", "C. 满仓突破", "D. 逆势加仓"], "ans": "B"}, {"stem": "\"八要素\"不包括？", "opts": ["A. 方向", "B. 止损价", "C. 别人的观点", "D. 风险比例"], "ans": "C"}, {"stem": "位移的三要素是？", "opts": ["A. 速度、破结构、留痕迹", "B. 成交量、均线、MACD", "C. 开盘、收盘、影线", "D. 新闻、情绪、价格"], "ans": "A"}, {"stem": "看涨 Breaker 形成前，价格必须先？", "opts": ["A. 创新高", "B. 扫掉前低的卖方流动性，再突破前高", "C. 横盘三天", "D. 出现十字星"], "ans": "B"}, {"stem": "IFVG 的成立条件是？", "opts": ["A. 影线刺穿 FVG", "B. 实体收盘穿过 FVG", "C. FVG 被触碰一次", "D. FVG 宽度足够大"], "ans": "B"}, {"stem": "PO3 三段的顺序是？", "opts": ["A. 派发 → 吸筹 → 操纵", "B. 吸筹 → 操纵 → 派发", "C. 操纵 → 派发 → 吸筹", "D. 没有固定顺序"], "ans": "B"}, {"stem": "EURUSD 创新低而 GBPUSD 没有，这叫？", "opts": ["A. OTE", "B. SMT 背离", "C. BPR", "D. MSS"], "ans": "B"}, {"stem": "压缩（Compression）走势为什么常常反转得很快？", "opts": ["A. 新闻驱动", "B. 途中小低点下的止损会被一次性扫掉", "C. 成交量太小", "D. 均线压制"], "ans": "B"}], "mistakes": ["只背术语，不懂逻辑：术语是结果，不是目标", "把 SMC 当找图形游戏：到处标 OB/FVG，重要的是\"哪一个、在什么位置\"", "只看订单区，不看结构：没有结构配合的 OB 会被一穿而过", "只看 FVG，不看位置：FVG 在贵区还是便宜区，决定它该怎么用", "只看流动性，不看后续：一扫就反手，可能撞上真突破", "扫完就冲：节奏要走完：扫 → 位移 → CHoCH → 回踩 → 确认", "看到 CHoCH 就认定反转：在大周期里可能只是回调中的抖动", "在小周期乱找信号：小周期是执行层，不是发现层", "不看大周期背景：永远先看大周期，再看小周期", "任何缺口都当 FVG：FVG 必须满足三根 K 线规则，并来自位移", "见区就做：OB 是候选反应区，不是必反按钮", "位置很差还硬做：位置错，信号再漂亮也要放弃", "不等触发：猜底猜顶，全靠\"感觉差不多了\"", "把诱导当真启动：扫完没位移 = 诱导；扫完有位移 = 启动", "把一次成功当公式：SMC 是框架不是模板，场景变了组合就变", "结构标错：只盯 OB，没把整段结构画对", "不看历史价格：每天先把图往回拉，当前价格永远处在历史结构的某个位置上", "不看新闻日历：重大事件前后，技术结构可能失效", "BOS / CHoCH 标错：影线刺穿不算，必须实体收盘", "忽略大周期结构：只在 5 分钟图上找 BOS/OB，大方向相反就会被碾过去", "不理解 OB 的本质：不是\"最后一根反向 K 线\"就行，要扫 + 失衡 + 结构", "选低流动性品种：结构不干净、插针多，容易被操纵", "挂单太苛刻：为了完美入场价，错过整笔机会", "用手机做关键操作：速度慢、容易点错", "疲劳或深夜交易：判断力下降，错误率高", "报复性交易：止损后马上再开一笔想扳回来", "被外部观点带偏：看到别人的观点就推翻自己的计划", "拒绝针只看第一根：不看第 2 根 K 线的态度", "横盘期硬找机会：窄幅震荡里，所有信号都容易两头挨打", "没有失效条件的偏见：只写看多看空，不写什么情况下认错"], "adv": [{"t": "A. ICT 补充概念", "b": "> 出处：ICT（Inner Circle Trader，Michael J. Huddleston）公开教学中的概念，结合公开资料用自己的话整理"}, {"t": "A1. 破坏块（Breaker Block）", "b": "**一句话**：一个**失效的 OB**，在扫过流动性、结构反转之后，变成反方向的反应区。\n\n**看涨 Breaker 的形成顺序**：\n1. 价格先形成一个低点 L，反弹出一个高点 H\n2. 从 H 开始下跌，**跌破 L**，扫掉 L 下方的卖方流动性\n3. 随后强势上涨，**实体收盘突破 H**（结构反转，MSS）\n4. H 处、下跌开始前的那段上涨 K 线（原本是看跌 OB）被突破失效 → 它成了**看涨 Breaker**\n5. 价格回落到这里，观察是否获得支撑\n\n**画法分歧**：有的教材取 H 处的上涨 K 线，有的取失败那段下跌里的 K 线。本教程取前者。\n\n**逻辑**：原来在这里卖出的人，看着价格突破回来，会在回到成本附近时平仓（买回），形成支撑。\n\n**区域口径**：和 OB 一样，取那根 K 线的实体，影线作缓冲。\n\n看跌 Breaker 镜像：高点 H → 回落出低点 L → 上涨扫掉 H → 实体跌破 L → L 处原本的看涨 OB 失效，变成压力。"}, {"t": "A2. 缓解块（Mitigation Block）", "b": "**一句话**：和 Breaker 很像，区别是**没有扫流动性**。\n\n- Breaker：从 H 下跌时**跌破了前低 L**（扫了流动性），再突破 H\n- Mitigation：从 H 下跌时**没能跌破 L**（形成更高的低点，属于\"失败摆动\"），然后突破 H\n\nMitigation 说明下跌方连扫流动性的力气都没有了。它的强度一般被认为不如 Breaker，因为少了\"扫完流动性\"这层证据。"}, {"t": "A3. 反转 FVG（IFVG）与平衡价区（BPR）", "b": "**IFVG（Inversion FVG）**：一个 FVG 被价格**实体收盘穿过**后，作用反转。例如原本的看涨 FVG 被跌穿，之后价格反弹回到这里，它可能变成压力。\n- 判断关键：必须是**实体收盘**穿过，影线刺穿不算\n\n**BPR（Balanced Price Range）**：一个看涨 FVG 和一个看跌 FVG 在价格上**重叠**，重叠的那段就是 BPR。两次快速走势都经过这里，被视为更敏感的反应区。"}, {"t": "A4. 最佳入场区（OTE）", "b": "**一句话**：在一段有效推动之后，回撤到 **0.62–0.79** 斐波那契区间时，被视为位置更好的入场区；0.705 常被当作中心参考。\n\n**怎么画**（多头）：从推动的起点（低点）拉到终点（高点），看回撤落在 0.62–0.79 之间。\n\n**和 Premium / Discount 的关系**：OTE 在 Discount 区的深处（0.5 以下），本质是\"在便宜区里找更便宜的位置\"。\n\n**注意**：OTE 只是位置过滤，不是入场信号。到了 OTE 仍然要等节奏（反应 K 线、小级别 CHoCH）。"}, {"t": "A5. 强高 / 弱高、强低 / 弱低", "b": "- **强低（Strong Low）**：造成向上 BOS 的那个低点。价格跌破它，上涨结构就失效了，所以它是多头要**保护**的点\n- **弱高（Weak High）**：上涨中还没被突破、后续很可能被拿走的高点，是**目标**\n- 下跌结构镜像：强高被保护，弱低是目标\n\n**用法**：止损放在强点之外，目标看弱点。这和\"止损基于结构、目标看对侧流动性\"是同一件事的另一种说法。"}, {"t": "A6. 内部流动性与外部流动性（IRL / ERL）", "b": "- **ERL（External Range Liquidity）**：区间外侧的流动性，即摆动高点上方、摆动低点下方的止损池\n- **IRL（Internal Range Liquidity）**：区间内部的流动性，主要指 FVG 等失衡区域\n\n**节奏**：价格常在两者之间轮动：扫完 ERL → 回到 IRL（回补 FVG）→ 再去下一个 ERL。\n\n**用法**：刚扫完外部流动性，下一步多半先回 FVG；刚回补完 FVG，下一步多半去扫外部流动性。"}, {"t": "A7. 时段与 Killzone", "b": "ICT 体系认为，不同交易时段的波动特征不同。以下用**纽约时间**表示（北京时间约 +12 小时，美国冬令时 +13 小时）：\n\n| 时段 | 纽约时间（约） | 常见特征 |\n|---|---|---|\n| 亚洲时段 | 20:00–00:00 | 波动较小，常形成区间，高低点成为后续的流动性目标 |\n| 伦敦 Killzone | 02:00–05:00 | 常先扫亚洲区间的一侧，再走出当日方向 |\n| 纽约 Killzone | 07:00–10:00 | 波动最大，常延续或反转伦敦的走势 |\n\n**注意**：不同教材给的时间段略有差异；这些主要基于外汇和美股指数的经验，加密市场 24 小时交易，时段效应较弱，只能参考。"}, {"t": "A8. PO3 / AMD（三段式）", "b": "**PO3（Power of Three）**，也叫 **AMD**：一个周期（常用日线）里，价格常经历三段：\n\n1. **Accumulation（吸筹）**：开盘附近横盘\n2. **Manipulation（操纵）**：向**反方向**假突破，扫掉一侧流动性\n3. **Distribution（派发）**：朝真正的方向走出主要波动\n\n**例子**（看涨日）：开盘后先跌破开盘价、扫掉前低，然后大幅上涨，收在高位。\n\n**和 SMC 的关系**：第 2 段就是\"清扫\"，第 3 段就是\"位移\"。PO3 只是把\"扫 → 位移\"放进了一个时间框架里看。"}, {"t": "A9. SMT 背离", "b": "**一句话**：两个**高度相关**的品种，一个创了新低（或新高），另一个没有。\n\n- 例子：EURUSD 创新低，GBPUSD 没有创新低 → 下方的新低更可能只是一次扫流动性，而不是真跌\n- 常见配对：EURUSD / GBPUSD、纳指 / 标普、BTC / ETH\n\n**用法**：作为\"清扫 vs 真突破\"的额外证据，不单独作为入场信号。\n\n---"}, {"t": "B. QM / 供需入场模型图鉴", "b": "> 出处：模型清单参考网络流传的《ICT 机构价格行为备忘单》（TRADER_ZHAO 整理），文字全部重写、示意图全部重画；\"在 SMC 里对应什么\"为作者的解读"}, {"t": "B0. 先建立对应关系", "b": "这一派的核心工具是**供应区（Supply）**和**需求区（Demand）**，以及**QML（QM Level，卡西莫多线）**。用 SMC 的语言翻译：\n\n| 这一派的说法 | SMC 里对应的概念 |\n|---|---|\n| 供应区 / 需求区 | 订单区 OB / POI |\n| QM（卡西莫多） | 扫高（或扫低）+ CHoCH + 回测左肩 |\n| Fakeout（假突破） | 流动性清扫 |\n| 2R / 2S（两次触碰同一阻力 / 支撑） | 等高 / 等低（流动性堆积） |\n| SR Flip（支撑阻力互换） | 结构突破后的角色转换，类似 Breaker |\n| Compression（压缩） | 人为制造的流动性 / 诱导 |\n| Flag Limit | 造成突破的那段基底，类似 OB |\n\n**所有模型都描述看跌版本**；看涨版本把图上下翻转即可。图例：H = 高点，L = 低点，HH = 更高的高点，LL = 更低的低点，R = 阻力，S = 支撑，LQ = 流动性。\n\n---"}, {"t": "B1. QM 基础形态（卡西莫多）", "b": "**结构**：H → L → **HH**（创新高）→ **LL**（跌破 L）\n\n- HH 扫掉了 H 上方的流动性\n- LL 跌破了 L，结构转向（相当于 CHoCH）\n- **QML** = 左肩 H 的水平线。价格反弹回到 QML 附近（QML 到 HH 之间）时，是观察做空的区域\n\n（字符图见 `07-字符图库.md` 同编号小节。）\n\n**要点**：\n- HH 必须是\"扫高后回落\"，LL 必须是实体收盘跌破 L\n- 区域在 QML 和 HH 之间，不要只盯一条线"}, {"t": "B2. QM 快速回测 vs 延迟回测", "b": "- **快速回测（Quick Retest）**：跌出 LL 后，**直接**反弹回 QML\n- **延迟回测（Late Retest）**：跌出 LL 后先在低位**横盘一段**，形成小区间，过一阵才回到 QML\n\n**区别的意义**：延迟回测时，低位的小区间会堆积流动性，价格回到 QML 前常先扫掉这个小区间的高点。"}, {"t": "B3. 影线 QM（DM Shadow）", "b": "**结构**：QM 的头部（HH）只是**一根 K 线的影线**：价格快速刺破前高后马上被反向吞没。\n\n**区域**：取那根刺破 K 线的影线范围作为供应区。\n\n**和本教程口径的关系**：本教程的 OB 只取实体；影线 QM 是这一派专门用影线定义区域的特例，讲解时说明这一点。"}, {"t": "B4. 延续型 QM（Continuation QM）", "b": "**结构**：在**已有的下跌趋势中**，回调时形成一个小 QM，然后继续下跌。\n\n**意义**：QM 不只用于反转，也能用于趋势中的回调入场。对应 SMC 里\"大方向不变，内部结构完成一次 CHoCH 后顺势入场\"。"}, {"t": "B5. 双顶 / 双底假突破（2R / 2S Fakeout）", "b": "**结构**：价格两次触碰同一阻力（R、R），形成明显的等高 → 第三次**刺破**等高（扫流动性）→ 迅速跌回下方\n\n（字符图见 `07-字符图库.md` 同编号小节。）\n\n**对应**：就是 SMC 的\"等高被扫\"。越明显的双顶，越容易被扫。"}, {"t": "B6. QM 再入场（Re-entry：主 QML 与小 QML）", "b": "**结构**：一个大 QM 形成后，在下跌途中又出现一个**小 QM**。\n- **主 QML**：大结构的 QML\n- **小 QML**：下跌途中形成的小 QML\n\n**用法**：如果价格没回到主 QML，可以在小 QML 再找一次入场机会；小 QML 离主 QML 越近，参考价值越高。"}, {"t": "B7. 被忽略的 QM（Ignored QM，IQML）", "b": "**结构**：QM 形成后，价格**没有回测**QML 就继续下跌，这个 QML 被\"忽略\"了。之后价格反弹，在到达 IQML 之前，常会先在中间某个水平做一次假突破（扫掉中间的阻力），再回到 IQML。\n\n**用法**：被忽略的 QML 不等于失效。等价格回来，并留意它到达前的那次假突破。"}, {"t": "B8. 统治者（Ruler）", "b": "**结构**：价格多次围绕**同一条水平线**来回（图上依次标为 1、2、3、3、4），这条线反复起作用；之后价格离开，再第 5 次回到该区域时找入场。\n\n**意义**：一条被反复验证的水平线，周围堆积了大量订单和止损。第 5 次回来时，相当于回测一个\"被市场反复确认过的\"供需区。"}, {"t": "B9. V 型双底 / 双顶（V Twin）", "b": "**结构**：在关键水平附近出现**两个 V 形转折**（快速下探后快速拉回），供应 / 需求区画在 V 的位置。\n\n**意义**：快速的 V 形说明这里有大量挂单被成交，价格回来时容易再次反应。"}, {"t": "B10. 旗形限制（Flag Limit / Flag B）", "b": "**结构**（看跌）：\n1. 价格在高位横盘，形成一个\"旗\"\n2. 一段下跌**吞没了前低**（Engulf Previous Low）\n3. 造成这次吞没的那段起跌基底，就是 **Flag Limit**，作为供应区\n4. 价格反弹回 Flag Limit 时找空，途中常出现 R1、R2 两个小阻力\n\n（字符图见 `07-字符图库.md` 同编号小节。）\n\n**对应**：Flag Limit 本质上就是\"造成位移、吞没前低\"的 OB。"}, {"t": "B11. 双旗形（Flag A + Flag B）", "b": "**结构**：先形成一个旗（Flag A），价格突破后又形成第二个旗（Flag B），第二个旗的限制区作为供应区。\n\n**意义**：两层基底叠加，说明这一侧的订单很集中。实战中优先看离当前价更近、且未被测试过的那一层。"}, {"t": "B12. 默认假突破（Fakeout V1）", "b": "**结构**：一个高点后价格下跌，在下方形成两个较低的阻力 R1、R2 → 价格反弹，**刺破 R1 / R2** → 到达上方的供应区后下跌\n\n**对应**：R1、R2 上方是流动性，价格先扫掉它们，才回到真正的供应区。也就是\"先扫诱导，再到真区域\"。"}, {"t": "B13. 支撑阻力互换假突破（Fakeout V2，SR Flip）", "b": "**结构**：原来的支撑 S 被跌破后变成阻力（SR Flip）→ 价格在这个阻力下方形成 R1、R2 → 假突破这些阻力，到达上方供应区后下跌\n\n**对应**：SR Flip 和 Breaker 的逻辑相同：原来在这里买入的人被套，价格回到成本附近时选择平仓，形成压力。"}, {"t": "B14. 钻石假突破（Fakeout V3，Diamond）", "b": "**结构**：在供应区下方，价格走出一个类似钻石的收敛形态（先扩张后收敛），**QM 的头部和前面的 R1 / R2 处在同一水平**，然后向下突破。\n\n**要点**：头部与前面的阻力位在同一水平，是识别它的关键。"}, {"t": "B15. 最大痛苦位（MPL，Maximum Pain Level）", "b": "**结构**：\n1. 价格在阻力附近多次触碰（R、R），堆积止损\n2. 一次**猎杀止损**（Stop Hunt）刺破这些阻力\n3. 随后一段下跌**吞没前低**\n4. 猎杀止损的那个区域，就是 MPL 供应区\n\n**对应**：MPL ≈ 扫掉等高 + 位移跌破结构后的 OB。名字的意思是：在这里追多的人\"最痛\"。"}, {"t": "B16. 双重支撑阻力（Double SSR）", "b": "**结构**：图上有**两层**水平位：上层原本是阻力（R），下层原本是支撑（S），价格在两层之间来回。之后价格**跌破下层**，下层由支撑变成阻力；价格反弹时要先穿过已经翻转的下层，再到达上层的供应区，两层压力叠加。\n\n**意义**：两层压力叠加，比单层更可靠；但也意味着突破后需要更大的力量。"}, {"t": "B17. 三推（3 Drive）", "b": "**结构**：价格分**三段**推向供应区（1 Drive、2 Drive、3 Drive），每一段的力度逐渐减弱，第三推到达区域后反转\n\n（字符图见 `07-字符图库.md` 同编号小节。）\n\n**意义**：力度递减，说明推动方越来越没力气；同时每一段的回调低点都在堆积流动性，反转后会被一路扫掉。"}, {"t": "B18. 反复敲打（CAN CAN）", "b": "**结构**：价格先在供应区**快速触碰多次**（像敲罐子），然后回落，再用一段段重叠、力度很弱的小波浪慢慢磨回来，最终再次回到供应区并下跌。\n\n**意义**：缓慢、重叠的回升没有力度，是在\"慢慢走回去\"而不是\"打上去\"，所以回到区域时更容易被压回。"}, {"t": "B19. 压缩（Compression，CP）", "b": "**结构**：价格以**重叠、阶梯式、力度很弱**的方式靠近供应区；途中形成的每一个小需求区，都被后面的价格清除（Demand Clear）。\n\n（字符图见 `07-字符图库.md` 同编号小节。）\n\n**对应**：压缩就是 SMC 里人为制造的流动性 / 诱导：一路向上的小低点下面全是多头止损，反转时会被一次性扫掉，所以反转往往很快。"}, {"t": "B20. 压缩流动性（CPLQ）与 CAN CAN 假突破", "b": "- **CPLQ（Compression Liquidity）**：压缩过程中形成了明显的 R、R（等高），价格先向上**扫掉这些等高（LQ）**，再从供应区下跌\n- **CAN CAN + Fakeout**：CAN CAN 式的缓慢回升，最后一冲**越过供应区**扫掉上方流动性（假供应），然后下跌\n\n**共同点**：区域本身不是终点，区域**上方的流动性**才是。价格先扫流动性，再反转。\n\n---"}, {"t": "C. 学这些模型的正确姿势", "b": "1. **先认概念，再认形态**：每个模型都能拆成\"流动性 + 结构 + 区域\"三件事。拆不出来，说明还没看懂\n2. **名字不重要**：同一种走势，不同教材可能叫不同的名字。能说清\"谁的止损在哪、谁被套、价格为什么回来\"才重要\n3. **形态不等于信号**：所有模型都只是告诉你\"在哪里等\"，入场仍然要等节奏（反应 K 线、小级别 CHoCH）\n4. **不要贪多**：挑 2–3 个最容易识别的（建议 QM、2R/2S 假突破、Flag Limit），在自己的图上回看 50 次以上，再考虑加新的"}], "diagrams": ["diagrams/png/00-七步阅读顺序.png", "diagrams/png/01-市场结构.png", "diagrams/png/02-BOS-CHoCH-MSS.png", "diagrams/png/03-流动性清扫.png", "diagrams/png/04-诱导Inducement.png", "diagrams/png/05-FVG三根K线.png", "diagrams/png/06-订单区OB.png", "diagrams/png/07-Premium-Discount.png", "diagrams/png/08-完整入场节奏.png", "diagrams/png/09-清扫vs真突破.png", "diagrams/png/10-拒绝针强弱.png", "diagrams/png/11-OB一图看懂.png"], "models": ["diagrams/models/png/A1-Breaker破坏块.png", "diagrams/models/png/A2-Mitigation缓解块.png", "diagrams/models/png/A4-OTE最佳入场区.png", "diagrams/models/png/A8-PO3三段式.png", "diagrams/models/png/B01-QM基础形态.png", "diagrams/models/png/B02-QM延迟回测.png", "diagrams/models/png/B03-影线QM.png", "diagrams/models/png/B04-延续型QM.png", "diagrams/models/png/B05-双顶假突破.png", "diagrams/models/png/B06-QM再入场.png", "diagrams/models/png/B07-被忽略的QM.png", "diagrams/models/png/B08-统治者.png", "diagrams/models/png/B09-V型双顶.png", "diagrams/models/png/B10-旗形限制.png", "diagrams/models/png/B11-双旗形.png", "diagrams/models/png/B12-默认假突破.png", "diagrams/models/png/B13-支撑阻力互换假突破.png", "diagrams/models/png/B14-钻石假突破.png", "diagrams/models/png/B15-最大痛苦位.png", "diagrams/models/png/B16-双重支撑阻力.png", "diagrams/models/png/B17-三推.png", "diagrams/models/png/B18-反复敲打.png", "diagrams/models/png/B19-压缩.png", "diagrams/models/png/B20-压缩流动性与假突破.png"]};</script>
+<script>
+const $=id=>document.getElementById(id);
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); $(b.dataset.p).classList.add('on');
+});
+let done=JSON.parse(localStorage.getItem('smc_done')||'[]');
+function saveProg(){localStorage.setItem('smc_done',JSON.stringify(done));renderLessons();}
+function renderLessons(){
+  const el=$('lessonList');el.innerHTML='';
+  DATA.lessons.forEach((l,i)=>{
+    const d=document.createElement('div');d.className='card lesson'+(done.includes(i)?' done':'');
+    d.innerHTML='<div class="done-dot">'+(done.includes(i)?'✓':i)+'</div><div><h3>'+l.name+'</h3><small>'+l.goal+'</small></div>';
+    d.onclick=()=>openLesson(i); el.appendChild(d);
+  });
+  const n=done.length,t=DATA.lessons.length;
+  $('pbar').style.width=(n/t*100)+'%'; $('ptxt').textContent='进度 '+n+'/'+t+' 课 · 点开课程学习，末尾标记完成';
+}
+function openLesson(i){
+  const l=DATA.lessons[i];
+  const panel=document.createElement('div');
+  panel.style.cssText='position:fixed;inset:0;background:var(--bg);z-index:98;overflow:auto;padding:16px 14px 80px';
+  const cards=l.cards.map(c=>'<button class="card-btn" onclick="this.classList.toggle(\'flip\');this.querySelector(\'.a\').style.display=this.classList.contains(\'flip\')?\'block\':\'none\'">'+c.q+'<span class="a" style="display:none;color:var(--gold);font-size:13px">　→ '+c.a+'</span></button>').join('');
+  panel.innerHTML='<div style="text-align:right"><span onclick="panelClose(this)" style="color:var(--mut);font-size:22px;cursor:pointer">✕</span></div>'
+  +'<h2 style="color:var(--gold);font-size:18px">'+l.name+'</h2>'
+  +'<img class="dg" src="'+l.img+'" onclick="view(this.src)">'
+  +'<div class="sec">🎯 目标</div><div class="point">'+l.goal+'</div>'
+  +'<div class="sec">📌 要点</div><div class="point">'+l.points+'</div>'
+  +(l.mistake?'<div class="sec">⚠️ 常见误区</div><div class="mist">'+l.mistake+'</div>':'')
+  +'<div class="sec">✍️ 练习</div><div class="point">'+l.practice+'</div>'
+  +'<div class="sec">🃏 过关自测（点击翻面看答案）</div>'+cards
+  +'<button class="card-btn" style="text-align:center;background:var(--green);border-color:var(--green);color:#fff;margin-top:14px" onclick="markDone('+i+')">'+(done.includes(i)?'✓ 已完成':'标记本课完成')+'</button>';
+  document.body.appendChild(panel);
+}
+function panelClose(el){el.parentElement.parentElement.remove();renderLessons();}
+function markDone(i){if(!done.includes(i))done.push(i);saveProg();
+  document.querySelectorAll('body > div[style*="position:fixed"]').forEach(p=>{if(p.id!=='viewer')p.remove()});
+  renderLessons();}
+function renderGal(){
+  $('gal1').innerHTML=DATA.diagrams.map(p=>{const n=p.split('/').pop().replace('.png','');
+    return '<div onclick="view(\''+p+'\')"><img src="'+p+'" loading="lazy"><div>'+n+'</div></div>'}).join('');
+  $('gal2').innerHTML=DATA.models.map(p=>{const n=p.split('/').pop().replace('.png','');
+    return '<div onclick="view(\''+p+'\')"><img src="'+p+'" loading="lazy"><div>'+n+'</div></div>'}).join('');
+}
+function view(src){$('vimg').src=src;$('viewer').style.display='block';}
+function renderMist(){
+  $('mistList').innerHTML=DATA.mistakes.map(m=>'<div class="card" style="padding:10px 12px;font-size:13px">⚠️ '+m+'</div>').join('');
+  $('advList').innerHTML=DATA.adv.map(a=>'<details style="border-bottom:1px solid var(--line);padding:8px 0"><summary style="color:var(--ink);font-size:14px;cursor:pointer">'+a.t+'</summary><div class="point" style="margin-top:6px">'+a.b+'</div></details>').join('');
+}
+let qi=[],score=0,qNow=0;
+function startQuiz(){
+  qi=[...DATA.quiz].sort(()=>Math.random()-.5).slice(0,5);score=0;qNow=0;renderQ();
+}
+function renderQ(){
+  if(qNow>=qi.length){
+    $('quizBox').innerHTML='<div style="text-align:center;padding:20px"><div style="font-size:34px;color:var(--gold)">'+score+'/'+qi.length+'</div>'
+    +'<div style="color:var(--mut);margin:8px 0">'+(score>=4?'优秀，这个概念你已经拿下了':score>=3?'过关，薄弱的地方回课程里再翻翻':'建议回到课程把错题对应的概念重学')+'</div>'
+    +'<button class="card-btn" style="text-align:center" onclick="startQuiz()">再来一轮</button></div>';return;
+  }
+  const q=qi[qNow];
+  $('quizBox').innerHTML='<div style="color:var(--mut);font-size:12px">第 '+(qNow+1)+'/'+qi.length+' 题 · 得分 '+score+'</div>'
+  +'<div style="margin:8px 0 4px">'+q.stem+'</div>'
+  +q.opts.map(o=>'<button class="q-opt" onclick="pick(this,\''+o[0]+'\')">'+o+'</button>').join('');
+}
+function pick(btn,letter){
+  const q=qi[qNow];
+  document.querySelectorAll('.q-opt').forEach(b=>b.onclick=null);
+  if(letter===q.ans){btn.classList.add('right');score++;}
+  else{btn.classList.add('wrong');
+    document.querySelectorAll('.q-opt').forEach(b=>{if(b.textContent.startsWith(q.ans))b.classList.add('right')});}
+  setTimeout(()=>{qNow++;renderQ();},1400);
+}
+$('qhint').textContent='题库共 '+DATA.quiz.length+' 题 · 选完立即判分';
+renderLessons();renderGal();renderMist();
+</script></body></html>
